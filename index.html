@@ -1358,10 +1358,6 @@ img{display:block;max-width:100%}
 .splash .nm{font-size:13px;letter-spacing:.5px;font-weight:600;opacity:.85}
 
 /* responsive */
-@media (max-height:920px){.stage{transform:scale(.94)}}
-@media (max-height:800px){.stage{transform:scale(.86)}}
-@media (max-width:500px){.stage{transform:scale(.98)}}
-@media (max-height:720px){.stage{transform:scale(.78)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 html.snap *,html.snap *::before,html.snap *::after{animation:none!important;transition:none!important}
 
@@ -1371,27 +1367,7 @@ html.snap *,html.snap *::before,html.snap *::after{animation:none!important;tran
 #wallpaper > *{
   display:none !important;
 }
-/* ========================================= */
-/* 纯 CSS 终极手机适配，绝对不卡顿 */
-/* ========================================= */
-@media screen and (max-width: 500px) {
-  /* 强制取消之前可能导致布局错乱的缩放 */
-  .stage {
-    transform: none !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100vw;
-    height: 100vh;
-  }
-  
-  /* 让手机模型自动按比例缩小，完美居中 */
-  #phone {
-    transform: scale(min(calc(100vw / 440), calc(100vh / 900))) !important;
-    transform-origin: center center !important;
-    margin: 0 !important;
-  }
-}
+
 /* === 手机自适应修复 === */
 </style>
 </head>
@@ -5595,6 +5571,37 @@ if (previewQuery.get('unlock') || previewQuery.get('app')) {
   }, 80);
 }
 
+</script>
+<script>
+(function(){
+    function fitPhone() {
+        var phone = document.getElementById('phone');
+        if (!phone) return;
+        // 获取屏幕的宽和高
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        // 计算缩放比例（左右和上下各留出 15px 的黑边）
+        var scaleW = (vw - 30) / 409;
+        var scaleH = (vh - 30) / 868;
+        // 取宽和高里面较小的那个比例，保证能完整装下
+        var scale = Math.min(scaleW, scaleH);
+        
+        // 如果屏幕特别大，最多放大到 100%，不无限放大
+        if (scale > 1) scale = 1; 
+        
+        // 直接缩放手机模型
+        phone.style.transform = 'scale(' + scale + ')';
+        phone.style.transformOrigin = 'center center';
+    }
+    
+    // 页面加载完、屏幕变化、手机横竖屏切换时，都重新算一次
+    window.addEventListener('resize', fitPhone);
+    window.addEventListener('orientationchange', fitPhone);
+    fitPhone();
+    
+    // 延迟 300 毫秒再算一次，防止手机浏览器顶部地址栏收缩导致高度变化
+    setTimeout(fitPhone, 300);
+})();
 </script>
 </body>
 </html>
