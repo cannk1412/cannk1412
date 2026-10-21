@@ -1358,10 +1358,6 @@ img{display:block;max-width:100%}
 .splash .nm{font-size:13px;letter-spacing:.5px;font-weight:600;opacity:.85}
 
 /* responsive */
-@media (max-height:920px){.stage{transform:scale(.94)}}
-@media (max-height:800px){.stage{transform:scale(.86)}}
-@media (max-width:500px){.stage{transform:scale(.98)}}
-@media (max-height:720px){.stage{transform:scale(.78)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 html.snap *,html.snap *::before,html.snap *::after{animation:none!important;transition:none!important}
 
@@ -1371,6 +1367,9 @@ html.snap *,html.snap *::before,html.snap *::after{animation:none!important;tran
 #wallpaper > *{
   display:none !important;
 }
+/* === 手机自适应修复 === */
+html,body{height:100dvh!important}
+body{position:fixed!important;inset:0!important;overflow:hidden!important}
 </style>
 </head>
 <body>
@@ -5573,6 +5572,24 @@ if (previewQuery.get('unlock') || previewQuery.get('app')) {
   }, 80);
 }
 
+</script>
+<script>
+(function(){
+  var phone = document.getElementById('phone');
+  var W = 409, H = 868;
+  function fit(){
+    var vw = document.documentElement.clientWidth || window.innerWidth;
+    var vh = (window.visualViewport && window.visualViewport.height)
+          || document.documentElement.clientHeight || window.innerHeight;
+    var s = Math.min((vw - 16) / W, (vh - 16) / H);
+    phone.style.transform = 'scale(' + s + ')';
+    phone.style.transformOrigin = 'center center';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', fit);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+})();
 </script>
 </body>
 </html>
