@@ -1538,7 +1538,9 @@ img{display:block;max-width:100%}
 .call-note{margin-top:10px;font-size:9px;color:rgba(255,255,255,.35)}
 .k-cn{font-size:9.5px;color:#9aa0a6;margin-top:3px;line-height:1.4}
 .k-opts{display:flex;flex-direction:column;gap:6px;padding:8px 12px 4px;background:#fff;border-top:1px solid #f0f0f0}
-.k-opts button{height:38px;border-radius:12px;border:1px solid #e6e0f5;background:#f7f3ff;color:#4a3a7a;font-size:12px;font-weight:600;text-align:left;padding:0 14px}
+.k-opts button{border-radius:12px;border:1px solid #e6e0f5;background:#f7f3ff;color:#4a3a7a;text-align:left;padding:8px 14px;display:flex;flex-direction:column;gap:2px}
+.k-opts button .ko{font-size:12.5px;font-weight:650;color:#3b2d63}
+.k-opts button .cn{font-size:9.5px;color:#8e8e93;font-weight:400}
 .bub-opts{margin:8px 12px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 2px 10px rgba(120,90,200,.08)}
 .bub-opts-t{font-size:10px;color:#8b7fa8;margin-bottom:8px;line-height:1.5}
 .bub-opts button{display:block;width:100%;margin-top:6px;height:36px;border-radius:11px;border:1px solid #e6dcfa;background:#f8f4ff;color:#5a4790;font-size:12px;font-weight:600}
@@ -3280,6 +3282,11 @@ const KAKAO_NAME = {
   jaewon:['최재원','崔在元'], minjin:['최민진','崔敏真'], invest:['투자 법무','投资法务']
 };
 function kakaoName(c, k) { const v = KAKAO_NAME[c.id]; return v ? v[k] : c.name; }
+function kakaoCn(c) {
+  const list = (c.msgs || []).filter(m => m.t !== 'sys' && m.cn);
+  const last = list[list.length - 1];
+  return last ? last.cn : kakaoName(c, 1);
+}
 function kakaoRow(c, i) {
   return `<div class="kakao-row" data-open-chat="${i}">
     ${c.pinned ? `<span class="pin">📌</span>` : ''}
@@ -3287,7 +3294,7 @@ function kakaoRow(c, i) {
     <div class="meta">
       <div class="nm">${esc(kakaoName(c,0))} ${c.members > 1 ? `<span class="members">${c.members}</span>` : ''}</div>
       <div class="preview">${esc(c.preview)}</div>
-      <div class="preview-cn">${esc(kakaoName(c,1))}</div>
+      <div class="preview-cn">${esc(kakaoCn(c))}</div>
     </div>
     <div class="right"><span class="time">${esc(c.time)}</span>${c.unread ? `<span class="unread">${c.unread}</span>` : ''}</div>
   </div>`;
@@ -3340,7 +3347,7 @@ VIEWS['kakao.chat'] = (p) => {
   return `<div class="app kakao-app">
     ${appHead(esc(kakaoName(c,0)), {sub:(isGroup ? `${c.members}人 · ` : '') + kakaoName(c,1), right:`<button class="head-btn" data-action="call" data-name="${esc(c.name)}">${SVG_UI.phone}</button><button class="head-btn">${xIcon(SVG_UI.search, 16)}</button>`})}
     <main class="app-body kakao-room" id="kakaoBody"><div style="min-height:100%;display:flex;flex-direction:column;justify-content:flex-end"><div style="height:7px"></div>${body}<div id="kakaoTyping"></div><div style="height:8px"></div></div></main>
-    ${(c.opts && !c.done) ? `<div class="k-opts" id="kakaoOpts">${c.opts.map((o, oi) => `<button onclick="kakaoPick(${p.i}, ${oi})">${esc(o.cn)}</button>`).join('')}</div>` : ''}
+    ${(c.opts && !c.done) ? `<div class="k-opts" id="kakaoOpts">${c.opts.map((o, oi) => `<button onclick="kakaoPick(${p.i}, ${oi})"><span class="ko">${esc(o.kr)}</span><span class="cn">${esc(o.cn)}</span></button>`).join('')}</div>` : ''}
     <div class="kakao-input">
       <button class="plus">＋</button>
       <textarea class="field" id="kakaoInput" rows="1" placeholder="输入消息" data-enter="kakao.send"></textarea>
@@ -6987,6 +6994,7 @@ window.callMount = function () {
       if (box && node.choices) {
         box.innerHTML = node.choices.map(([label, next]) => `<button onclick="callPick('${next}', '${label.replace(/'/g, "\\'")}')">${esc(label)}</button>`).join('');
         box.classList.add('show');
+        callScroll();
       }
       return;
     }
@@ -7005,7 +7013,7 @@ window.callMount = function () {
         cnEl.textContent = cn;
         cnEl.classList.add('show');
         callScroll();
-        setTimeout(step, 520);
+        setTimeout(step, 620);
       }
     }, 105);
   };
@@ -7016,8 +7024,7 @@ VIEWS['call.home'] = () => {
   const stage = state.callStage || 'ring';
   const head = `<div class="call-status">${stage === 'ring' ? '来电' : stage === 'vm' ? '语音信箱' : '通话中'}</div>
     <div class="call-line"><b>薄荷</b><span>主号</span></div>
-    <div class="call-time">${stage === 'ring' ? '13:30' : stage === 'vm' ? '13:29' : '00:12'}</div>
-    ${stage === 'live' ? `<div class="call-note">박하준의 폰에서 걸려온 전화 · 用朴何俊的手机打来</div>` : ''}`;
+    <div class="call-time">${stage === 'ring' ? '13:30' : stage === 'vm' ? '13:29' : '00:12'}</div>`;
 
   if (stage === 'ring') {
     return `<div class="app call-app">
